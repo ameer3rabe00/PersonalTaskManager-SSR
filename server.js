@@ -33,7 +33,7 @@ app.use('/', auth_R);
 
 
 const users_R = require('./Routers/users_R');
-const course_R = require('./Routers/course_R');
+const categories_R = require('./Routers/categories_R');
 
 
 
