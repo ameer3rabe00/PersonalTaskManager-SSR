@@ -7,16 +7,14 @@ const path = require("path");
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-var cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-global.jwt = require('jsonwebtoken');
 global.addSlashes = require('slashes').addSlashes;
 global.stripSlashes = require('slashes').stripSlashes;
-global.was_logged = false;
 
 
-let db_M = require('./database');
+const db_M = require('./database');
 global.db_pool = db_M.pool;
 
 
@@ -24,16 +22,15 @@ app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, "./views"));
 app.use(express.static("public"));
 
+// addecd this cause i dont have login (only for test)
+app.use((req, res, next) => {
+    req.user_id = 1;
+    next();
+});
+//end of test
 
-const user_Mid = require("./middleware/user_Mid");
-
-
-const auth_R = require('./Routers/auth_R');
-app.use('/', auth_R);
-
-
-const users_R = require('./Routers/users_R');
 const categories_R = require('./Routers/categories_R');
+app.use('/categorie', categories_R);
 
 
 
@@ -42,5 +39,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });

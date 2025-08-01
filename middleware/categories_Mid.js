@@ -1,69 +1,73 @@
-async function Addcategorie(req,res,next){
+async function AddCategorie(req, res, next) {
     let name = addSlashes(req.body.name);
-    let Query=`INSERT INTO categories ( name) VALUES ('${name}')`;
+    let user_id = req.user_id;
+
+    let Query = `INSERT INTO categories (user_id, name) VALUES ('${user_id}', '${name}')`;
+
     const promisePool = db_pool.promise();
-    let rows=[];
     try {
-        [rows] = await promisePool.query(Query);
+        await promisePool.query(Query);
     } catch (err) {
         console.log(err);
     }
 
     next();
 }
-async function Updatecategorie(req,res,next){
+
+async function UpdateCategorie(req, res, next) {
     let id = parseInt(req.params.id);
-    if(id <= 0){
-        req.GoodOne=false;
+    if (id <= 0) {
+        req.GoodOne = false;
         return next();
     }
-    req.GoodOne=true;
+    req.GoodOne = true;
+
     let name = addSlashes(req.body.name);
-    let Query=`UPDATE categories SET name='${name}' WHERE id='${id}'`;
+    let Query = `UPDATE categories SET name='${name}' WHERE id='${id}'`;
+
     const promisePool = db_pool.promise();
-    let rows=[];
     try {
-        [rows] = await promisePool.query(Query);
+        await promisePool.query(Query);
     } catch (err) {
         console.log(err);
     }
 
     next();
 }
-async function GetAllcategories(req,res,next){
+
+async function GetAllCategories(req, res, next) {
     let filter = (req.query.filter !== undefined) ? req.query.filter : "";
-    let Query="SELECT * FROM categories";
-    let wh="";
-    if(filter !== ""){
-        wh += (wh === "")?" WHERE " : " AND ";
-        wh += ` ( name LIKE '%${filter}%' )`;
+    let user_id = req.user_id;
+
+    let Query = "SELECT * FROM categories";
+    let wh = ` WHERE user_id = '${user_id}'`;
+
+    if (filter !== "") {
+        wh += ` AND name LIKE '%${filter}%'`;
     }
 
-    Query += wh;
-    Query += " ORDER BY name ASC ";
-    Query+= " LIMIT 0,100 ";
+    Query += wh + " ORDER BY name ASC LIMIT 0,100";
 
     const promisePool = db_pool.promise();
-    let rows=[];
-    req.categories_data=[];
+    req.categories_data = [];
+
     try {
-        [rows] = await promisePool.query(Query);
-        req.ccategories_data=rows;
+        const [rows] = await promisePool.query(Query);
+        req.categories_data = rows;
     } catch (err) {
         console.log(err);
     }
 
     next();
 }
-async function GetcategoriesNames(req,res,next){
-    let Query="SELECT * FROM categories";
 
+async function GetCategoriesNames(req, res, next) {
     const promisePool = db_pool.promise();
-    let rows=[];
-    req.categories_names=[];
+    req.categories_names = [];
+
     try {
-        [rows] = await promisePool.query(Query);
-        for(let row of rows) {
+        const [rows] = await promisePool.query("SELECT * FROM categories");
+        for (let row of rows) {
             req.categories_names[row.id] = row.name;
         }
     } catch (err) {
@@ -72,21 +76,22 @@ async function GetcategoriesNames(req,res,next){
 
     next();
 }
-async function GetOnecategorie(req,res,next){
+
+async function GetOneCategorie(req, res, next) {
     let id = parseInt(req.params.id);
-    console.log(id)
-    if((id === NaN) || (id <= 0)){
-        req.GoodOne=false;
+    if (isNaN(id) || id <= 0) {
+        req.GoodOne = false;
         return next();
     }
-    req.GoodOne=true;
-    let Query=`SELECT * FROM categories  WHERE id='${id}' `;
+
+    req.GoodOne = true;
+    let Query = `SELECT * FROM categories WHERE id='${id}'`;
     const promisePool = db_pool.promise();
-    let rows=[];
-    req.one_categorie_data=[];
+    req.one_categorie_data = [];
+
     try {
-        [rows] = await promisePool.query(Query);
-        if(rows.length > 0) {
+        const [rows] = await promisePool.query(Query);
+        if (rows.length > 0) {
             req.one_categorie_data = rows[0];
         }
     } catch (err) {
@@ -95,27 +100,27 @@ async function GetOnecategorie(req,res,next){
 
     next();
 }
-async function Deletecategorie(req,res,next){
+
+async function DeleteCategorie(req, res, next) {
     let id = parseInt(req.body.id);
-    if(id > 0) {
-        let Query = `DELETE FROM categories WHERE id='${id}' `;
+    if (id > 0) {
+        let Query = `DELETE FROM categories WHERE id='${id}'`;
         const promisePool = db_pool.promise();
-        let rows = [];
         try {
-            [rows] = await promisePool.query(Query);
+            await promisePool.query(Query);
         } catch (err) {
             console.log(err);
         }
     }
 
     next();
+}
 
-}
 module.exports = {
-    Addcategorie,
-    GetAllcategories,
-    GetcategoriesNames,
-    GetOnecategorie,
-    Deletecategorie,
-    Updatecategorie,
-}
+    AddCategorie,
+    UpdateCategorie,
+    GetAllCategories,
+    GetCategoriesNames,
+    GetOneCategorie,
+    DeleteCategorie,
+};
