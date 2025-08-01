@@ -12,30 +12,31 @@ app.use(cookieParser());
 
 global.addSlashes = require('slashes').addSlashes;
 global.stripSlashes = require('slashes').stripSlashes;
-
+global.jwt = require('jsonwebtoken');
 
 const db_M = require('./database');
 global.db_pool = db_M.pool;
-
 
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, "./views"));
 app.use(express.static("public"));
 
-// addecd this cause i dont have login (only for test)
-app.use((req, res, next) => {
-    req.user_id = 1;
-    next();
-});
-//end of test
 
+const user_Mid = require("./middleware/user_Mid");
+
+
+const auth_R = require('./Routers/auth_R');
 const categories_R = require('./Routers/categories_R');
-app.use('/categorie', categories_R);
 
+
+app.use('/', auth_R);
+
+
+app.use('/categorie', [user_Mid.isLogged], categories_R);
 
 
 app.get('/', (req, res) => {
-    res.render("index", {});
+    res.redirect('/login');
 });
 
 app.listen(port, () => {
