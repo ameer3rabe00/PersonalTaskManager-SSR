@@ -84,8 +84,119 @@ async function AddUser(req, res, next) {
     next();
 }
 
+async function UpdateUser(req, res, next) {
+    let id = parseInt(req.params.id);
+    if (id <= 0) {
+        req.GoodOne = false;
+        return next();
+    }
+    req.GoodOne = true;
+
+    let name = (req.body.name !== undefined) ? addSlashes(req.body.name) : "";
+    let uname = (req.body.uname !== undefined) ? addSlashes(req.body.uname) : "";
+    let email = (req.body.email !== undefined) ? addSlashes(req.body.email) : "";
+    let tz = (req.body.tz !== undefined) ? addSlashes(req.body.tz) : "";
+
+    let Query = `UPDATE users SET `;
+    Query += `name='${name}', `;
+    Query += `uname='${uname}', `;
+    Query += `email='${email}', `;
+    Query += `tz='${tz}' `;
+    Query += `WHERE id='${id}'`;
+
+    const promisePool = db_pool.promise();
+    try {
+        await promisePool.query(Query);
+    } catch (err) {
+        console.log(err);
+    }
+
+    next();
+}
+
+async function GetAllUsers(req, res, next) {
+    let page = 0;
+    let rowPerPage = 10;
+    
+    if (req.query.p !== undefined) {
+        page = parseInt(req.query.p);
+    }
+    req.page = page;
+
+    let countQuery = "SELECT COUNT(id) AS cnt FROM users";
+    const promisePool = db_pool.promise();
+    let total_rows = 0;
+    
+    try {
+        const [rows] = await promisePool.query(countQuery);
+        total_rows = rows[0].cnt;
+    } catch (err) {
+        console.log(err);
+    }
+    req.total_pages = Math.floor(total_rows / rowPerPage);
+
+    let Query = "SELECT * FROM users";
+    Query += ` ORDER BY name ASC LIMIT ${page * rowPerPage},${rowPerPage}`;
+
+    req.users_data = [];
+    try {
+        const [rows] = await promisePool.query(Query);
+        req.users_data = rows;
+    } catch (err) {
+        console.log(err);
+    }
+
+    next();
+}
+
+async function GetOneUser(req, res, next) {
+    let id = parseInt(req.params.id);
+    if (isNaN(id) || id <= 0) {
+        req.GoodOne = false;
+        return next();
+    }
+    req.GoodOne = true;
+
+    let Query = `SELECT * FROM users WHERE id='${id}'`;
+    const promisePool = db_pool.promise();
+    req.one_user_data = {};
+
+    try {
+        const [rows] = await promisePool.query(Query);
+        if (rows.length > 0) {
+            req.one_user_data = rows[0];
+        } else {
+            req.GoodOne = false;
+        }
+    } catch (err) {
+        console.log(err);
+        req.GoodOne = false;
+    }
+
+    next();
+}
+
+async function DeleteUser(req, res, next) {
+    let id = parseInt(req.body.id);
+    if (id > 0) {
+        let Query = `DELETE FROM users WHERE id='${id}'`;
+        const promisePool = db_pool.promise();
+        try {
+            await promisePool.query(Query);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    next();
+}
+
 module.exports = {
     CheckLogin,
     isLogged,
     AddUser,
+    UpdateUser,
+    GetAllUsers,
+    GetOneUser,
+    DeleteUser,
 };

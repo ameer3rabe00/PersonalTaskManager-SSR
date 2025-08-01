@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= page_title %></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            margin: 20px;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .header-actions {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header-actions a {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .header-actions a:hover {
+            background-color: #0056b3;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        td, th {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .edit-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e0a800;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .no-users {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+        
+        form {
+            display: inline;
+        }
+        
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .pagination button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .pagination button:hover {
+            background-color: #0056b3;
+        }
+        
+        .page-info {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1><%= page_title %></h1>
+
+<div class="header-actions">
+    <a href="/users/Add">הוסף משתמש חדש</a>
+</div>
+
+<table>
+    <tr>
+        <th>פעולות</th>
+        <th>שם</th>
+        <th>שם משתמש</th>
+        <th>אימייל</th>
+        <th>תעודת זהות</th>
+        <th>מחיקה</th>
+    </tr>
+    <% if (users.length === 0) { %>
+        <tr>
+            <td colspan="6" class="no-users">לא נמצאו משתמשים</td>
+        </tr>
+    <% } else { %>
+        <% for(let user of users) { %>
+            <tr>
+                <td>
+                    <a href="/users/Edit/<%= user.id %>" class="action-btn edit-btn">ערוך</a>
+                </td>
+                <td><%= user.name %></td>
+                <td><%= user.uname %></td>
+                <td><%= user.email %></td>
+                <td><%= user.tz %></td>
+                <td>
+                    <form action="/users/Delete" method="post" 
+                          onsubmit="return confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')">
+                        <input type="hidden" name="id" value="<%= user.id %>">
+                        <button type="submit" class="action-btn delete-btn">
+                            מחק
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        <% } %>
+    <% } %>
+</table>
+
+<div class="pagination">
+    <form action="" method="get">
+        <% if(page > 0) { %>
+            <button name="p" value="<%= page-1 %>">עמוד קודם</button>
+        <% } %>
+        
+        <span class="page-info">עמוד <%= page+1 %> מתוך <%= total_pages+1 %></span>
+        
+        <% if(page < total_pages) { %>
+            <button name="p" value="<%= page+1 %>">עמוד הבא</button>
+        <% } %>
+    </form>
+</div>
+</body>
+</html>
