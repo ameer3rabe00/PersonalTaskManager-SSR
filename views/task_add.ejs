@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= data.id ? 'עריכת משימה' : 'הוספת משימה' %></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #218838;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .checkbox-container {
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1><%= data.id ? 'עריכת משימה' : 'הוספת משימה' %></h1>
+<form action="" method="post">
+    <label for="description">תיאור המשימה (עד 200 תווים)</label>
+    <textarea name="description" id="description" maxlength="200" required><%= data.description || '' %></textarea>
+    
+    <label for="target_date">תאריך יעד</label>
+    <input type="date" name="target_date" id="target_date" value="<%= data.target_date ? data.target_date.toISOString().split('T')[0] : '' %>" required>
+    
+    <label for="category_id">קטגוריה</label>
+    <select name="category_id" id="category_id" required>
+        <option value="">בחר קטגוריה</option>
+        <% for(let category of categories) { %>
+            <option value="<%= category.id %>" 
+                    <%= (data.category_id == category.id) ? 'selected' : '' %>>
+                <%= category.name %>
+            </option>
+        <% } %>
+    </select>
+    
+    <% if (data.id) { %>
+    <div class="checkbox-container">
+        <label for="is_completed">
+            <input type="checkbox" name="is_completed" id="is_completed" value="1" 
+                   <%= data.is_completed ? 'checked' : '' %>>
+            המשימה הושלמה
+        </label>
+    </div>
+    <% } %>
+    
+    <button type="submit"><%= data.id ? 'עדכן משימה' : 'הוסף משימה' %></button>
+</form>
+
+<div class="back-link">
+    <a href="/tasks/List">חזור לרשימת המשימות</a>
+</div>
+</body>
+</html>

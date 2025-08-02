@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= page_title %></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            margin: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .header-actions {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header-actions a {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        
+        .header-actions a:hover {
+            background-color: #0056b3;
+        }
+        
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        select, button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #218838;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .completed {
+            background-color: #d4edda;
+        }
+        
+        .overdue {
+            background-color: #f8d7da;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            margin: 2px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        .edit-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .toggle-btn {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            margin: 0 5px;
+        }
+        
+        .description {
+            max-width: 250px;
+            word-wrap: break-word;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<h1><%= page_title %></h1>
+
+<div class="header-actions">
+    <a href="/tasks/Add">הוסף משימה חדשה</a>
+    <a href="/categorie/List">ניהול קטגוריות</a>
+    
+</div>
+
+<div class="filters">
+    <form action="" method="get">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="completion_filter">סטטוס:</label>
+                <select name="completion_filter" id="completion_filter">
+                    <option value="all" <%= filter_params.completion_filter === 'all' ? 'selected' : '' %>>
+                        כל המשימות
+                    </option>
+                    <option value="completed" <%= filter_params.completion_filter === 'completed' ? 'selected' : '' %>>
+                        הושלמו
+                    </option>
+                    <option value="not_completed" <%= filter_params.completion_filter === 'not_completed' ? 'selected' : '' %>>
+                        לא הושלמו
+                    </option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="category_filter">קטגוריה:</label>
+                <select name="category_filter" id="category_filter">
+                    <option value="-1" <%= filter_params.category_filter === -1 ? 'selected' : '' %>>
+                        כל הקטגוריות
+                    </option>
+                    <% for(let category of categories) { %>
+                        <option value="<%= category.id %>" 
+                                <%= filter_params.category_filter == category.id ? 'selected' : '' %>>
+                            <%= category.name %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+            
+            <button type="submit">סנן</button>
+        </div>
+    </form>
+</div>
+
+<table>
+    <tr>
+        <th>תיאור</th>
+        <th>תאריך יעד</th>
+        <th>קטגוריה</th>
+        <th>סטטוס</th>
+        <th>פעולות</th>
+    </tr>
+    <% if (tasks.length === 0) { %>
+        <tr>
+            <td colspan="5">לא נמצאו משימות</td>
+        </tr>
+    <% } else { %>
+        <% for(let task of tasks) { 
+            let isOverdue = new Date(task.target_date) < new Date() && !task.is_completed;
+            let rowClass = task.is_completed ? 'completed' : (isOverdue ? 'overdue' : '');
+        %>
+            <tr class="<%= rowClass %>">
+                <td class="description"><%= task.description %></td>
+                <td><%= task.nice_date %></td>
+                <td><%= categories_names[task.category_id] || 'לא מוגדר' %></td>
+                <td>
+                    <%= task.is_completed ? '✓ הושלם' : 'לא הושלם' %>
+                    <% if (isOverdue) { %>
+                        <br><small style="color: red;">באיחור</small>
+                    <% } %>
+                </td>
+                <td>
+                    <a href="/tasks/Edit/<%= task.id %>" class="action-btn edit-btn">ערוך</a>
+                    
+                    <form action="/tasks/Toggle" method="post" style="display: inline;">
+                        <input type="hidden" name="id" value="<%= task.id %>">
+                        <input type="hidden" name="is_completed" value="<%= task.is_completed ? 0 : 1 %>">
+                        <button type="submit" class="action-btn toggle-btn">
+                            <%= task.is_completed ? 'בטל השלמה' : 'סמן כהושלם' %>
+                        </button>
+                    </form>
+                    
+                    <form action="/tasks/Delete" method="post" style="display: inline;" 
+                          onsubmit="return confirm('האם אתה בטוח שברצונך למחוק משימה זו?')">
+                        <input type="hidden" name="id" value="<%= task.id %>">
+                        <button type="submit" class="action-btn delete-btn">מחק</button>
+                    </form>
+                </td>
+            </tr>
+        <% } %>
+    <% } %>
+</table>
+
+<div class="pagination">
+    <form action="" method="get" style="display: inline;">
+        <input type="hidden" name="completion_filter" value="<%= filter_params.completion_filter %>">
+        <input type="hidden" name="category_filter" value="<%= filter_params.category_filter %>">
+        
+        <% if(page > 0) { %>
+            <button name="p" value="<%= page-1 %>">עמוד קודם</button>
+        <% } %>
+        
+        עמוד <%= page+1 %> מתוך <%= total_pages+1 %>
+        
+        <% if(page < total_pages) { %>
+            <button name="p" value="<%= page+1 %>">עמוד הבא</button>
+        <% } %>
+    </form>
+</div>
+</body>
+</html>
