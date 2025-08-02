@@ -29,14 +29,11 @@ const categories_R = require('./Routers/categories_R');
 const tasks_R = require('./Routers/tasks_R');
 const users_R = require('./Routers/users_R');
 
-
 app.use('/', auth_R);
-
 
 app.use('/categorie', [user_Mid.isLogged], categories_R);
 app.use('/tasks', [user_Mid.isLogged], tasks_R);
 app.use('/users', [user_Mid.isLogged], users_R);
-
 // Home page redirect
 app.get('/', (req, res) => {
     res.redirect('/login');
