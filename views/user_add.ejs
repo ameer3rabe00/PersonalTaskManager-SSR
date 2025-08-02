@@ -6,11 +6,12 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><%= data.id ? 'עריכת משתמש' : 'הוספת משתמש' %></title>
+    <link rel="stylesheet" href="/sidebar.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             direction: rtl;
-            max-width: 500px;
+            max-width: 1000px;
             margin: 50px auto;
             padding: 20px;
         }
@@ -90,6 +91,7 @@
     </style>
 </head>
 <body>
+    <%- include('partials/sidebar') %>
 <h1><%= data.id ? 'עריכת משתמש' : 'הוספת משתמש' %></h1>
 <form action="" method="post">
     <label for="name">שם מלא</label>
@@ -119,5 +121,6 @@
 <div class="back-link">
     <a href="/users/List">חזור לרשימת המשתמשים</a>
 </div>
+<script src="/js/sidebar.js"></script>
 </body>
 </html>
